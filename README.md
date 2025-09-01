@@ -5,7 +5,7 @@ You will submit your work by creating a Pull Request (PR) to this repository on 
 
 ## Due dates
 
-* HW1 18 September
+* HW1 23 September
 * HW2 9 October
 * HW3 6 November
 * HW4 27 November
