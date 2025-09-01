@@ -1,5 +1,5 @@
 ---
-title: "Homework 4 - Unsupervised Learning"
+title: "Homework 4 - Clustering, Bootstrap, Ensembles"
 author: "[Your Name Here]"
 date: "Due November 27 at 11pm"
 output:
@@ -55,163 +55,18 @@ Please be as honest as possible.
 
 \clearpage
 
+\clearpage
 
-# Introduction {-}
+# Clustering (3 points)
 
-Throughout this assignment, we will be looking at a data set of Whisky flavour profiles. David Wishart was at one point, Chief Statistician at the Scottish Office of the Civil Service. When he retired, he focused on Whisky and wrote a book called ["Whisky Classified"](https://www.powells.com/book/whisky-classified-choosing-single-malts-by-flavour-9781911595731). For the book, he collected tasting notes published about 86 different Scotch Whisky distilleries on a number of aspects and "distilled" them down to 12 flavour categories. Then each distillery's representative whisky was given a score on each category from 0-4, 0 meaning that that flavour is not represented in that whisky, 4 meaning that it is strongly represented.
-
-The data set was later expanded to include more distilleries and crowd-sourced tasting notes, but, this data seems to be kept only in a for-profit Windows software which no longer exists. Dr. Wishart passed away in 2020, and there seems to be no way to access the larger data set.
-
-You have here, the version of the data from the first edition of Dr. Wishart's book. An article describing some of his analyses with 185 single malts was published in 2009 in [Significance](https://rss.onlinelibrary.wiley.com/doi/full/10.1111/j.1740-9713.2009.00337.x).
-
-We will undertake some similar analyses in this homework assignment. A snapshot of the data is shown below.
+We will revisit the whisky data from Homework 3, Question 2.
 
 ```{r whisky-vars, echo=FALSE}
 N <- nrow(whisky)
-whisky %>% str()
+x <- whisky %>% select(Body:Floral) %>% as.matrix()
 ```
 
-
-\clearpage
-
-
-# Dimension reduction (6 points)
-
-## (0.5 points)
-
-Create a bar chart that shows 12 panels, one for each of the twelve flavour
-profiles. In each panel, the heights of the bars should be the percent of
-whiskys with each score 0-4 (out of 86 total) (the y-axis is a percent between
-0 and 100). Make sure that your graphic fits on 1 page.
-
-::: {.solbox data-latex=""}
-```{r flavourings}
-# your code
-```
-
-:::
-
-
-\clearpage
-
-## (0.5 points)
-
-Charts should always be described in any analysis or else they are useless. Examining your chart, describe any patterns you see in a few sentences
-(at most 3). There are many right answers. Wrong answers are things like
-"there are 12 panels" or "each panel has 5 bars" or "I don't see anything".
-
-::: {.solbox data-latex=""}
-Your answer
-:::
-
-
-\clearpage
-
-## (1 point)
-
-Perform PCA on the 12 flavour categories. Produce a scree plot with the y-axis
-displaying the percent of total variance explained by each component. Based on
-your plot, is 2 a reasonable number of dimensions to use? Why or why not?
-
-::: {.solbox data-latex=""}
-```{r estimate-pca}
-# your code
-```
-
-Your text
-:::
-
-
-\clearpage
-
-## (1 point)
-
-Produce a plot of PC1 vs PC2. Instead of a dot for each distillery, show the name of the distillery in the figure. (You'll have lots of words, some of which may be hard to read). Here's example code to get the idea.
-
-```{r, echo=TRUE, eval=FALSE}
-plot(1:5,1:5, pch = "")
-text(1:5,1:5, labels = letters[1:5])
-```
-
-In `ggplot`, you would use `geom_text()` or `geom_label()` rather than
-`geom_point()`.
-
-Also produce a plot of the Loadings for the first two PCs. Which qualities seem
-important (positive or negative) for each PC (describe this in 1-2 sentences)?
-Do any Distilleries stick out, if so, what qualities do they have in common?
-
-::: {.solbox data-latex=""}
-```{r, pc1-v-pc2}
-# your code to plot pc1 against pc2
-```
-
-```{r loadings-plot}
-# your code to plot the loadings
-```
-
-Your text
-:::
-
-
-
-\clearpage
-
-## (2 points)
-
-Complete the function below. See the documentation for help with the arguments.
-Your function must return a
-matrix of dimension `n` x `M` where `n` is the number of rows of `K`. Do not
-change the function signature.
-
-You should make your function produce errors or warnings if invalid inputs are
-passed. This is easiest way to do with `stop()` or `stopifnot()` or `warning()`.
-Try examining the documentation for those functions. Looking at the tests should
-help you determine what sorts of checks to perform and what warnings to throw.
-
-**Hint: think carefully about what the sign of `tol` should be to make this**
-**work. It may not conform to your first instinct.**
-
-::: {.solbox data-latex=""}
-```{r kpca-function}
-#' @param K a symmetric, non-negative definite Kernel matrix
-#' @param M positive integer for the target embedding dimension
-#' @param tol tolerance to test for negative definiteness.
-kpca <- function(K, M = 2, tol = -1e-8) {
-  # your code
-}
-```
-:::
-
-
-
-
-\clearpage
-
-## (1 point)
-
-Use your `kpca()` function to estimate kernel PCA. Form your `K` by first
-calculating the distance matrix between rows in your data using the `canberra`
-distance. The easiest way is with the `dist()` function. You have to convert the
-result to a matrix with `as.matrix()`. Then set `K` to be `1 -` this result.
-Pass that in to your function. Use `M = 2`.
-
-Now the hard part, produce a 12 panel plot as in 1. The x-axis should be the
-first component, the y-axis should be the second component. Colour the points
-based on the flavour score (0-4). Describe any patterns you notice in 2-3
-sentences.
-
-::: {.solbox data-latex=""}
-```{r whisky-kpca}
-# your code
-```
-
-Your text
-:::
-
-
-\clearpage
-
-# Clustering (4 points)
+We will now attempt to cluster the whiskys based on their flavour profiles.
 
 ## (1 point)
 
@@ -241,8 +96,11 @@ Your answer
 
 ## (1 point)
 
-Make a plot of PC1 vs PC2 as in Question 1.5 above, but colour the distillery
-names by cluster assignment. (You should be able to copy the code from above and make some minor changes.) Use the number of clusters that maximizes the CH Index. Describe any patterns you see.
+Recall last time that we performed a PCA on the 12 flavour categories.
+Make a plot of first two principle components, as in Question 2.4 from HW03, but colour the distillery
+names by cluster assignment.
+(You should be able to copy the code from the previous homework and make some minor changes.)
+Use the number of clusters that maximizes the CH Index. Describe any patterns you see.
 
 ::: {.solbox data-latex=""}
 ```{r cluster-pcs}
@@ -284,19 +142,282 @@ Your text
 
 \clearpage
 
+
+
+
+# Bootstrapping (4 points)
+
+We will revisit the `wiggly_function` data from Homework 2 Question 2.
+This time, rather than simulating training samples,
+we will instead use a fixed training set of $n=100$ points.
+It is stored as the tibble `wiggly` in the `Stat406` package.
+(Run `?wiggly` for details.)
+
+```{r generate-data, echo=TRUE, fig.align='center', fig.height=3, fig.width=4}
+data("wiggly")
+
+ggplot(wiggly, aes(x, y)) +
+  geom_point() +
+  stat_function(fun = wiggly_function, linewidth = 0.5, linetype = "dashed") +
+  labs(title = "Fixed Wiggly Data", x = "x", y = "y") +
+  theme_bw()
+```
+
+We will re-explore our bias-variance analysis from Homework 2, but using a bootstrapped training sample from a fixed dataset rather than using truly independent training samples.
+
+You'll need these helper functions from Homework 2:
+
+```{r helper-functions}
+#' Trains a polynomial regression model on training data and outputs
+#' predictions on test data.
+#' @param train.data A data frame containing a training sample with
+#' columns `x` and `y`.
+#' @param test.data A data frame containing the test data (e.g. `test.set`)
+#' with columns `x`.
+#' @param degree An integer specifying the degree of the polynomial to fit.
+#' @return A vector containing the predictions for the test data.
+compute.polynomial.predictions <- function(train.data, test.data, degree) {
+  model <- lm(y ~ poly(x, degree), data = train.data)
+  predictions <- predict(model, newdata = test.data)
+  predictions
+}
+
+test.set <- tibble(x = seq(0.1, 6, length.out = 50))
+test.set$y <- wiggly_function(test.set$x)
+```
+
 ## (1 point)
 
-Ron Swanson (of [Parks and Recreation](https://www.imdb.com/title/tt1266020/))
-famously loves Lagavulin (as do I). In light of your
-analyses in this assignment, are there other whiskys you would recommend Ron
-try? What flavour profiles does Ron enjoy? Produce any figures that can be used
-to back up your claims.
+Recreate the dataframe `wiggly.preds` from Homework 2 Question 2.3,
+except instead of using `create.training.sample` to generate training samples,
+construct $B=100$ bootstrap samples from the fixed `wiggly` data.
+
+(Hint: see `?slice_sample` for help constructing bootstrap samples.)
+
+**Important**: for full credit, the bootstrapped training sample:
+
+- Must be of size $n=100$ (preferably using `n=nrow(wiggly)` to avoid using a magic number)
+- Must have been constructed using resampling (i.e. `replace = TRUE`)
+
+::: {.solbox data-latex=""}
+
+```{r wiggly-preds-bootstrap}
+set.seed(12345)  # Lock the seed for reproducibility
+
+# your code
+```
+
+:::
+
+
+\clearpage
+
+## (1.5 points)
+a. (0.5 points) Now that you have the `wiggly.preds` dataframe,
+compute the same bias/variance plot that we created in Homework 2 Question 2.4,
+but this time using the bootstrap training samples rather than true training samples.
+
+b. (1 point) How do the trends in this plot differ from your Homework 2 plot?
+Offer potential hypotheses for why you may see different trends.
+
+::: {.solbox data-latex=""}
+
+a.
+```{r bias-variance-plot}
+
+```
+
+b.
+
+:::
+
+
+\clearpage
+
+## (1.5 points)
+
+a. (1 point) Using the `wiggly.preds` dataframe you just created,
+use the nonparametric bootstrap to produce 95% confidence intervals
+for the degree 5 polynomial predictions at the first 10 test points.
+Store the results in a dataframe `wiggly.degree5.cis` with columns
+`x` (test input), `y` (true response), `lower` (lower CI value), and `upper` (upper CI value).
+**Print the output of the dataframe.**
+
+**Remember to correct for the fact that you are producing 10 confidence intervals.**
+
+b. (0.5 points) Compute the coverage of the confidence intervals you just produced.
+Does this number seem reasonable to you? Why or why not?
+
+::: {.solbox data-latex=""}
+
+a.
+```{r bootstrap-intervals}
+
+```
+
+b.
+```{r bootstrap-coverage}
+
+```
+
+:::
+
+
+\clearpage
+
+# Bakeoff (3 points + potential bonus)
+
+This exercise is based on the the TV show
+["The Great British Bakeoff"](https://en.wikipedia.org/wiki/The_Great_British_Bake_Off).
+I am giving you information about bakers for the first 8 UK seasons. This data
+is derived from the package [bakeoff](https://bakeoff.netlify.app) by Alison
+Hill and Chester Ismay. You MAY NOT download this package (or use it). If you
+are unfamiliar with this show, I suggest you watch it! It's a great way to spend
+a few hours of your spare time.
+
+A few other bits of important information. Again, easier if you just watch an
+episode or read Wikipedia, but nonetheless. Each episode consists of 3 "bakes":
+"signature challenge", "technical challenge", and "showstopper". In the
+technical, the bakers are ranked from best to worst. At the end of the episode,
+someone is awarded "star baker" (this week's winner), and someone goes home.
+Thus, the winners who make it to the last episode appear in more episodes. I
+have removed any information that depends on how long a baker lasts from the
+data. Also, in the first season, no one was awarded star baker. Because there is
+only one "overall winner" for the season, I have counted all the bakers that
+make the final episode as "winners". This means about a quarter of bakers are
+winners and the rest are losers.
+
+> Your goal is to predict who will win and determine which features are useful
+> for predicting the winners. "Winners" for the purposes of this Homework are
+> defined to be any contestants involved in
+> the final episode of the season (3 per season), rather than just the overall
+> winner.
+
+First, load the training data.
+
+__Notes:__
+There are 4 character variables that cannot be used for this analysis because of
+their type. Do not use them. (They could likely be used with careful processing,
+but I doubt very much that it is worth the effort. For this reason, I'm leaving
+them in the data in case you want them for the bonus. But also because real data
+often comes with useless cruft you should probably remove.)
+
+
+```{r load-bakers}
+data("bakeoff_train")
+```
+
+## (0.5 points)
+
+In the data (after removing the 4 variables described in the note above), there are
+2 `numeric` variables which are entirely useless. They measure something which
+has nothing to do with winners and losers, and they are perfectly correlated
+with other variables. What are they?
 
 ::: {.solbox data-latex=""}
 Your answer
-
-```{r rons-faves}
-# code as needed
-```
 :::
 
+
+## (0.5 points)
+
+There is one variable which is `numeric`, but should be treated as
+`categorical`. You must determine which, and treat it as `categorical` in all
+your models. Which is it?
+
+::: {.solbox data-latex=""}
+Your answer
+:::
+
+
+
+\clearpage
+
+## (0.5 points)
+
+Estimate a random forest to predict "winners". You must use 400 trees. Report
+the Out-of-Bag error rate of the full 400 tree ensemble. You likely need to set
+the `na.action` argument to `randomForest()` to `na.omit`.
+
+::: {.solbox data-latex=""}
+```{r baker-forest}
+# your code
+```
+
+:::
+
+
+## (0.5 points)
+
+Inspect the Random Forest object. It contains a number of different things. Show
+the confusion matrix (part of the object). Does the Forest do better for winners
+or losers for the training set?
+
+::: {.solbox data-latex=""}
+```{r rf-confusion}
+# your code
+```
+
+:::
+
+
+## (0.5 point)
+
+Describe the difference between Out-of-Bag error and In-Sample error.
+
+::: {.solbox data-latex=""}
+Your answer
+:::
+
+
+\clearpage
+
+
+## (0.5 points)
+
+Using the same data, perform Bagging with 400 Trees.
+Report the confusion matrix. If your goal is "prediction accuracy" which method
+(RF or Bagging) should you use?
+
+::: {.solbox data-latex=""}
+```{r bagging}
+# your code
+```
+
+:::
+
+
+\clearpage
+
+# Bonus {.unnumbered}
+
+There is also a `bakeoff_test` dataset. This data is missing the response column. Your goal is to predict the response as accurately as possible.
+
+__The reward.__
+
+The student with the best score will receive 2 extra points toward their final
+mark. The student with the second best score will receive 1 point. In the event
+of a first place tie (to 5 decimal places), all tied students will receive the
+first place bonus, but no second place will be awarded. In the event of a second
+place tie, all tied students will receive the second-place bonus.
+
+__Rules:__
+
+1. You must correctly upload one (and only 1) submission to the `bakeoff-bakeoff`
+repo. This must be done by a separate PR (from your usual HW submission). I would
+let you upload directly to `main`, but that would allow you to potentially delete
+submissions and sabotage your classmates.
+1. Your submission must consist solely of a single `.rds` file. The name of the
+file must be `bake-ghusername.rds`. That file will contain 1 (one) `R` object
+which is a vector of `TRUE` and `FALSE` with your predicted classes. It must be
+of type `logical`.
+1. Suppose you have a vector `preds = c(TRUE, FALSE)`. You can achieve the above
+with the code `saveRDS(preds, "bake-ghusername.rds")`.
+1. Neither I nor the TAs will provide __any__ assistance. This means no questions
+on Slack or in office hours about approaches or methods for the bonus will be
+answered. You may use any methods you like. We will not resolve your Github
+issues on this repo nor will any late submissions be allowed. If your data is in
+the wrong format, you are ineligible.
+1. I have taken precautions to avoid cheating. If cheating is suspected, you
+will be disqualified with no recourse (i.e., don't come and argue with me).
+1. Have fun.
