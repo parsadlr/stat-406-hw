@@ -1,7 +1,7 @@
 ---
 title: "Homework 1 - The Learning Procedure"
 author: "[Your Name Here]"
-date: "Due 25 September at 11pm"
+date: "Due 23 September at 11pm"
 output:
   bookdown::pdf_document2:
     includes:
