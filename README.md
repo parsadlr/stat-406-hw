@@ -3,7 +3,7 @@
 This repository contains all of your homework assignments.
 You will submit your work by creating a Pull Request (PR) to this repository on GitHub.
 
-## Due dates
+## Due Dates
 
 * HW1 23 September
 * HW2 9 October
@@ -32,7 +32,7 @@ You will submit your work by creating a Pull Request (PR) to this repository on 
 1. When done, go to Github and open a PR. Be sure to Request Review from the TAs.
 1. Use the dropdown menu to go back to `main` and avoid future headaches.
 
-### Workflow from the command line
+### Workflow From the Command Line
 
 1. Make sure you are on `main`: `git branch -v`. Pull in any remote changes: `git pull`
 1. Create a new branch `git branch -b <name-of-branch>`
